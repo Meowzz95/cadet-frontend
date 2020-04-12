@@ -619,6 +619,18 @@ export function* evalCode(
         });
   }
 
+  function call_2_nondet() {
+    return code.trim() === 'try_again();'
+      ? call(resume, lastNonDetResult)
+      : call(runInContext, code, context, {
+        scheduler: 'nondet',
+        executionMethod: 'interpreter',
+        originalMaxExecTime: execTime,
+        useSubst: substActiveAndCorrectChapter
+      });
+  }
+
+
   const isNonDet: boolean = context.variant === 'non-det';
   const { result, interrupted, paused } = yield race({
     result:
@@ -626,6 +638,8 @@ export function* evalCode(
         ? call(resume, lastDebuggerResult)
         : isNonDet
         ? call_non_det()
+        : context.variant === 'nondet'
+        ? call_2_nondet()
         : call(runInContext, code, context, {
             scheduler: 'preemptive',
             originalMaxExecTime: execTime,
@@ -662,11 +676,11 @@ export function* evalCode(
     lastDebuggerResult = result;
   }
   yield updateInspector(workspaceLocation);
-
   if (
     result.status !== 'suspended' &&
     result.status !== 'finished' &&
-    result.status !== 'suspended-non-det'
+    result.status !== 'suspended-non-det' &&
+    result.status !== 'suspend-nondet'
   ) {
     yield put(actions.evalInterpreterError(context.errors, workspaceLocation));
     return;
@@ -674,7 +688,7 @@ export function* evalCode(
     yield put(actions.endDebuggerPause(workspaceLocation));
     yield put(actions.evalInterpreterSuccess('Breakpoint hit!', workspaceLocation));
     return;
-  } else if (isNonDet) {
+  } else if (isNonDet || context.variant === 'nondet') {
     if (result.value === 'cut') {
       result.value = undefined;
     }

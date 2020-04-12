@@ -227,6 +227,7 @@ export interface ISourceLanguage {
 export const sourceLanguages: ISourceLanguage[] = [
   { chapter: 1, variant: 'default' },
   { chapter: 2, variant: 'default' },
+  { chapter: 2, variant: 'nondet' },
   { chapter: 3, variant: 'default' },
   { chapter: 3, variant: 'concurrent' },
   { chapter: 3, variant: 'non-det' },
@@ -235,9 +236,11 @@ export const sourceLanguages: ISourceLanguage[] = [
 
 const variantDisplay: Map<Variant, string> = new Map([
   ['non-det', 'Non-Det'],
+  ['nondet', 'Non Det'],
   ['concurrent', 'Concurrent']
 ]);
 export const languageURLNames: Map<string, ISourceLanguage> = new Map([
+  ['2_Non_Det', { chapter: 2, variant: 'nondet' }],
   ['3_Non_Det', { chapter: 3, variant: 'non-det' }],
   ['3_Concurrent', { chapter: 3, variant: 'concurrent' }]
 ]);
